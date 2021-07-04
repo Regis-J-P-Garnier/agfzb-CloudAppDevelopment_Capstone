@@ -7,5 +7,5 @@
   - name: dealerreiew-nginx
     routes:
       - route: dealerreiew-regisgarnier.eu-gb.mybluemix.net/static
-    memory: 128M
+    memory: 64M
     buildpack: staticfile_buildpack
