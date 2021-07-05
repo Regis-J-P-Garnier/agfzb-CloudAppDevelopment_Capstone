@@ -1,6 +1,6 @@
 import requests
 import json
-from .models import CarDealer
+from .models import CarDealer, DealerReview
 from requests.auth import HTTPBasicAuth
 
 
@@ -62,13 +62,13 @@ def get_reviews_JSON_parser(json_result):
     results = []
     if json_result:
         reviews = json_result["data"] # Get the row list in JSON as dealers
-        for review in reviews: # For each dealer object
-            if (review != {}): # DEBUG : why ???
+        for review_dict in reviews: # For each dealer object
+            if (review_dict != {}): # DEBUG : why ???
             # Create a CarDealer object with values in `doc` object
-                review_obj = CarDealer(review=review["review"], purchase_date=review["purchase_date"], purchase=review["purchase"],
-                                       name=review["name"], id=review["id"], dealership=review["dealership"],
-                                       car_year=review["car_year"],
-                                       car_model=review["car_model"], car_make=review["car_make"])
+                review_obj = DealerReview(review=review_dict["review"], purchase_date=review_dict["purchase_date"], purchase=review_dict["purchase"],
+                                       name=review_dict["name"], id=review_dict["id"], dealership=review_dict["dealership"],
+                                       car_year=review_dict["car_year"],
+                                       car_model=review_dict["car_model"], car_make=review_dict["car_make"])
                 results.append(review_obj)
     return results     
     

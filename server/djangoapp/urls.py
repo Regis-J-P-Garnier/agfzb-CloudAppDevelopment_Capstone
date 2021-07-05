@@ -20,9 +20,9 @@ urlpatterns = [
     
     #path(route='', view=views.get_dealerships, name='index'),
     path('dealership/', view=views.get_dealerships, name='dealerships'),
-    #path('dealership/<state>/', view=views.get_dealerships_by_name, name='dealershipsbystate'),
+    path('dealership/<str:state>/', view=views.get_dealerships, name='dealershipsbystate'),
     #path('dealer/<int:dealer_id>/', view=views.get_dealer_details, name='dealer_details'),
-    
+    path('reviews/<int:dealer_id>/', view=views.get_reviews, name='reviews'),
     path(route='', view=views.index_request, name='index'),
 
     # path for dealer reviews view
