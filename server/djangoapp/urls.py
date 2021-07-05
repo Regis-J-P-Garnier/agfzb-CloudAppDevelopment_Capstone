@@ -19,6 +19,7 @@ urlpatterns = [
     re_path(r'^about', views.about_request, name='about'),
     re_path(r'^contact', views.contact_request, name='contact'),
     path(route='', view=views.get_dealerships, name='index'),
+    
 
     # path for dealer reviews view
 

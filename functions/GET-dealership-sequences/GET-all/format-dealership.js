@@ -9,6 +9,8 @@ function main(params) {
           zip: row.doc.zip,
           lat: row.doc.lat,
           long: row.doc.long,
+          short_name: row.doc.short_name,
+          full_name: row.doc.full_name
           }});
     if (returnData.length==0){return {error:404};}
     else
