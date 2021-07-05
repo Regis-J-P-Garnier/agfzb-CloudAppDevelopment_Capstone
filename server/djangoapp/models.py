@@ -32,7 +32,23 @@ class CarModel(models.Model):
     def __str__(self):
         return str( self.make.name) +" "+ self.name +" "+str( self.year.year)+ "," + self.type + ", from " + str(self.dealerId) # upgrade with dealers name ??
         
+class DealerReview:
+    def __init__(self, dealership, name, purchase, review, purchase_date, car_make, car_model, car_year, sentiment=None, id=None):
+        self.dealership = dealership
+        self.name = name
+        self.purchase = purchase
+        self.review = review
+        self.purchase_date = purchase_date
+        self.car_make = car_make
+        self.car_model = car_model
+        self.car_year = car_year
+        self.sentiment = sentiment
+        self.id = id
 
+    def __str__(self):
+        return "Reviewer name: " + self.name  + ", " + "Reviaw: " + self.review
+    
+    
 class CarDealer:
 
     def __init__(self, address, city, full_name, id, lat, long, short_name, st, zip):

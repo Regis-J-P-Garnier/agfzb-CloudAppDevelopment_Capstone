@@ -17,6 +17,8 @@ function main(params) {
                     "zip",
                     "lat",
                     "long",
+	                "short_name",
+	                "full_name",
                 ],
             sort: [
                     {

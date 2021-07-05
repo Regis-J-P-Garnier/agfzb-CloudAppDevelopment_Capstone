@@ -79,14 +79,15 @@ def contact_request(request):
     context={}
     return render(request, 'djangoapp/contact.html', context)
 # ...
+def index_request(request):
+    context={}
+    return  render(request, 'djangoapp/index.html', context)
 
 def get_dealerships(request):
-    if request.method == "GET":
-        url = "https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/alldealership"  
-        dealerships = get_dealers_from_cf(url) # Get dealers from the URL  
+    if request.method == "GET": 
+        dealerships = get_dealers_from_cf() # Get dealers from the URL  
         dealer_names = ' '.join([dealer.short_name for dealer in dealerships]) # Concat all dealer's short name
         return HttpResponse(dealer_names) # Return a list of dealer short name
-
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
 # def get_dealer_details(request, dealer_id):
