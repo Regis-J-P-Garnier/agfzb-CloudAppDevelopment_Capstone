@@ -24,10 +24,6 @@ def post_request(url, json_payload_dict, api_key=None, headers=None, **kwargs):
     print("POST to {} ".format(url))
     try:# Call get method of requests library with URL and parameters
         if NLU_API_KEY:
-            print(url)
-            print(headers)
-            print(json_payload_dict)
-            #json_payload_dict = {'dealership': 19, 'purchase': True, 'another': '', 'purchase_date': '2021-07-08', 'car_make': 'Ligier', 'car_model': '', 'car_year': '2021-01-01', 'name': 'BETA TESTER', 'review': 'reviewed 2021-01-01'}
             response = requests.post(url,
                                      #auth=HTTPBasicAuth('apikey', api_key),
                                      headers=headers, 
@@ -54,6 +50,7 @@ def get_request(url, api_key=None, params=None, **kwargs):
             params=kwargs
     
     print("GET from {} ".format(url))
+    print(params)
     try: # Call get method of requests library with URL and parameters
         if NLU_API_KEY:
             response = requests.get(url, headers={'Content-Type': 'application/json'},
@@ -78,7 +75,6 @@ def get_dealers_JSON_parser(json_result):
     ''' parse and convert to model object a GET on dealship database '''
     results = []
     if json_result:
-        print(json_result.keys())
         dealers = json_result["data"] # Get the row list in JSON as dealers
         for dealer in dealers: # For each dealer object
             if (dealer!= {}): # DEBUG : why ???
@@ -108,7 +104,6 @@ def get_dealers_from_cf(state=None,**kwargs):
 def analyze_review_sentiments(review, **kwargs): # review as text or object ?
     params = {}
     params["text"] = review
-
     #review #quote_plus(review)
     params["version"] = NLU_VERSION
     params["features"] = 'keywords,entities' # IBM endpoint only support comma separated multivalue : force it !
@@ -118,19 +113,26 @@ def analyze_review_sentiments(review, **kwargs): # review as text or object ?
     params["keywords.sentiment"] = True
     # curl -u "apikey:{apikey}"   "{url}/v1/analyze}?version=2021-03-25&url=www.ibm.com&features=keywords,entities&entities.emotion=true&entities.sentiment=true&keywords.emotion=true&keywords.sentiment=true"
     response = get_request(url=GET_NLU_URL, api_key=NLU_API_KEY, params=params)
-    print(response)
     # {'usage': {'text_units': 1, 'text_characters': 38, 'features': 2}, 'language': 'en', 
         # 'keywords': [{'text': 'dealer', 'sentiment': {'score': 0.977313, 'label': 'positive'}, 'relevance': 0.87516, 'count': 1}, {'text': 'cars', 'sentiment': {'score': 0.956888, 'label': 'positive'}, 'relevance': 0.74128, 'count': 1}], 'entities': []}
     # TODO : a better algorithm
     score=0.0
     iterations=0
-    for list_or_items in ['keywords','entities']:
+    features=[]
+    if 'keywords' in response.keys():
+        features.append('keywords')
+    if 'entities' in response.keys():
+        features.append('entities')    
+    for list_or_items in features:
         for item in response[list_or_items]:
-            iterations+=1
-            if  item['sentiment']['label'] == 'positive':
-                score+=item['sentiment']['score']
-            else:
-                score-=item['sentiment']['score']
+            try:    
+                if  item['sentiment']['label'] == 'positive':
+                    score+=item['sentiment']['score']
+                else:
+                    score-=item['sentiment']['score']
+                iterations+=1
+            except KeyError:
+                break
     if not iterations == 0:
         score=score/iterations
     else:
@@ -141,24 +143,30 @@ def get_reviews_JSON_parser(json_result):
     ''' parse and convert to model object a GET on review database '''
     results = []
     if json_result:
-        reviews = json_result["data"] # Get the row list in JSON as dealers
-        for review_dict in reviews: # For each dealer object
-            if (review_dict != {}): # DEBUG : why ???
-            # Create a CarDealer object with values in `doc` object
-                review_obj = DealerReview(review=review_dict["review"], purchase_date=review_dict["purchase_date"], purchase=review_dict["purchase"],
-                                       name=review_dict["name"], id=review_dict["id"], dealership=review_dict["dealership"],
-                                       car_year=review_dict["car_year"],
-                                       car_model=review_dict["car_model"], car_make=review_dict["car_make"])
-                review_obj.sentiment = analyze_review_sentiments(review_obj.review)
-                results.append(review_obj)
-            print(str(review_obj.sentiment)+'->'+review_obj.name)
+        if not "data" in json_result.keys():
+            if "error" in json_result.keys():
+                if  404 == json_result["error"]:
+                    pass # on empty return 
+                else:
+                    pass # TODO :error return
+        else:
+            print(json_result)
+            reviews = json_result["data"] # Get the row list in JSON as dealers
+            for review_dict in reviews: # For each dealer object
+                if (review_dict != {}): # DEBUG : why ???
+                # Create a CarDealer object with values in `doc` object
+                    review_obj = DealerReview(review=review_dict["review"], purchase_date=review_dict["purchase_date"], purchase=review_dict["purchase"],
+                                           name=review_dict["name"], id=review_dict["id"], dealership=review_dict["dealership"],
+                                           car_year=review_dict["car_year"],
+                                           car_model=review_dict["car_model"], car_make=review_dict["car_make"])
+                    review_obj.sentiment = analyze_review_sentiments(review_obj.review)
+                    results.append(review_obj)
+                #print(str(review_obj.sentiment)+'->'+review_obj.name)#DEBUG
     return results     
     
-
 def get_dealer_reviews_from_cf(dealer_id=0,**kwargs):
     json_result =  get_request(GET_REVIEW_BY_DEALER_URL, dealerId=dealer_id) 
     result =  get_reviews_JSON_parser(json_result)
-    print(result)
     return result
 
  

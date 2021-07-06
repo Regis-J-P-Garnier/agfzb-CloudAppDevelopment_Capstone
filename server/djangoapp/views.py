@@ -84,18 +84,34 @@ def index_request(request):
     return  render(request, 'djangoapp/index.html', context)
 
 def get_dealerships(request, state=None):
-    """ for DEBUGING purpose """
-    if request.method == "GET": 
-        dealerships = get_dealers_from_cf(state) # Get dealers from the URL  
-        dealer_names = ' '.join([dealer.short_name for dealer in dealerships]) # Concat all dealer's short name
-        return HttpResponse(dealer_names) # Return a list of dealer short name
+    """ retrieve and presents data of dealers """
+    context={}
+    if request.method == "GET":
+        context["dealership_list"] = get_dealers_from_cf(state) # Get dealers from the URL  
+        #dealer_names = ' '.join([dealer.short_name for dealer in dealerships]) # Concat all dealer's short name
+        #return HttpResponse(dealer_names) # Return a list of dealer short name
+    return render(request, 'djangoapp/index.html', context)    
+        
 
 def get_reviews(request,dealer_id=0):
-    """ for DEBUGING purpose """
+    """ retrieve and presents data of reviews """
+    context={}    
     if request.method == "GET":
-        reviews = get_dealer_reviews_from_cf(dealer_id)                         #reviews from the URL  
-        reviewers_names = ' '.join([review.name for review in reviews]) # Concat all reviewers's name
-        return HttpResponse(reviewers_names) # Return a list of reviewers short name
+        context["review_list"] = get_dealer_reviews_from_cf(dealer_id)
+        dealership_list= get_dealers_from_cf()
+        for dealer in dealership_list:
+            if dealer.id == dealer_id:
+                context["dealership_name"] = dealer.full_name
+        if  len(context["review_list"]) == 0:
+            context["review_list_is_empty"]=True
+        else:
+            context["review_list_is_empty"]=False
+        #reviews from the URL  
+        #reviewers_names = ' '.join([review.name for review in reviews]) # Concat all reviewers's name
+        #return HttpResponse(reviewers_names) # Return a list of reviewers short name
+    return render(request, 'djangoapp/dealer_details.html', context)   
+
+
 
 def add_review(request, dealer_id):
         review_done=""
