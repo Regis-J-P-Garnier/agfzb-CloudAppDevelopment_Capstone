@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import CarDealer, CarModel, CarMake
-from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf
+from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf, post_review_request_to_cf
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -84,6 +84,7 @@ def index_request(request):
     return  render(request, 'djangoapp/index.html', context)
 
 def get_dealerships(request, state=None):
+    """ for DEBUGING purpose """
     if request.method == "GET": 
         dealerships = get_dealers_from_cf(state) # Get dealers from the URL  
         dealer_names = ' '.join([dealer.short_name for dealer in dealerships]) # Concat all dealer's short name
@@ -96,7 +97,28 @@ def get_reviews(request,dealer_id=0):
         reviewers_names = ' '.join([review.name for review in reviews]) # Concat all reviewers's name
         return HttpResponse(reviewers_names) # Return a list of reviewers short name
 
-
+def add_review(request, dealer_id):
+        review_done=""
+        user = request.user
+        if user.is_authenticated:
+            json_payload_dict={}
+            review ={}
+            review["time"] = datetime.utcnow().isoformat()
+            review["name"] = "BETA TESTER"
+            review["dealership"] = 19
+            review["purchase"]=True
+            review["another"]=""
+            review["purchase_date"]="2021-07-08"
+            review["car_make"]="Ligier"
+            review["car_model"]=""
+            review["car_year"]="2021-01-01"
+            review["review"]="revue du 2021-01-01"
+            print(review)
+            response = post_review_request_to_cf(review)
+            print(response)
+            review_done=response
+        return HttpResponse(review_done)
+            
 # Create a `get_dealer_details` view to render the reviews of a dealer
 # def get_dealer_details(request, dealer_id):
 # ...

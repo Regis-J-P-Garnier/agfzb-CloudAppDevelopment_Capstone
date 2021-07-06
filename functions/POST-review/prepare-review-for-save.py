@@ -2,8 +2,10 @@ import sys
 import json
 
 def main(params):
-    if (params["dealership"] and params["dealership"] != "" and params["name"] and params["name"] != "" and params["review"] and params["review"] != ""):
+    if (params["dealership"] and params["name"] and params["review"]):
         dealershipID = int(params["dealership"])
+        if not "purchase" in params.keys():
+            params["purchase"] = None        
         if (params["purchase"] == "True" or params["purchase"] == "true" or params["purchase"]==True):
             purchaseBool = True
         else:

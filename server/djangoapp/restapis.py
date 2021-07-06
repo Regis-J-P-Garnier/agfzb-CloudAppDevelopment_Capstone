@@ -2,20 +2,66 @@ import requests
 import json
 from .models import CarDealer, DealerReview
 from requests.auth import HTTPBasicAuth
+from urllib.parse import urlencode, quote_plus, quote
+
 
 
 GET_DEALERSHIP_BY_STATE_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/dealership"
 GET_ALL_DEALERSHIP_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/alldealership"
 GET_REVIEW_BY_DEALER_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/review"
 POST_REVIEW_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/review"
+NLU_API_KEY="3JRYQBDauu2GkgWjkoffZH7IksttkjR20diV_c9KBMRK"
+GET_NLU_URL="https://api.eu-gb.natural-language-understanding.watson.cloud.ibm.com/instances/2c07214f-0d62-4c52-9bff-6bef76b858dc/v1/analyze"
+NLU_VERSION ='2021-03-25'
 
-def get_request(url, **kwargs):
+def post_request(url, json_payload_dict, api_key=None, headers=None, **kwargs):
+    ''' do a POST request '''
+    if not (kwargs is None) and not (kwargs == {}):
+        if not headers is None:
+            headers.update(kwargs)
+        else:
+            headers=kwargs
+    print("POST to {} ".format(url))
+    try:# Call get method of requests library with URL and parameters
+        if NLU_API_KEY:
+            print(url)
+            print(headers)
+            print(json_payload_dict)
+            #json_payload_dict = {'dealership': 19, 'purchase': True, 'another': '', 'purchase_date': '2021-07-08', 'car_make': 'Ligier', 'car_model': '', 'car_year': '2021-01-01', 'name': 'BETA TESTER', 'review': 'reviewed 2021-01-01'}
+            response = requests.post(url,
+                                     #auth=HTTPBasicAuth('apikey', api_key),
+                                     headers=headers, 
+                                     data=json.dumps(json_payload_dict))
+        else:
+            response = requests.post(url,
+                                     headers=headers, 
+                                     data=json.dumps(json_payload_dict))
+    except: # If any error occurs   
+        print("Network exception occurred")  
+    status_code = response.status_code
+    print("With status {} ".format(status_code))
+    json_data = json.loads(response.text)
+    if "error" in json_data.keys():
+        pass # TODO error management
+    return json_data           
+
+def get_request(url, api_key=None, params=None, **kwargs):
     ''' do a GET request '''
-    print(kwargs)
+    if not (kwargs is None) and not (kwargs == {}):
+        if not params is None:
+            params.update(kwargs)
+        else:
+            params=kwargs
+    
     print("GET from {} ".format(url))
     try: # Call get method of requests library with URL and parameters
-        response = requests.get(url, headers={'Content-Type': 'application/json'},
-                                    params=kwargs)
+        if NLU_API_KEY:
+            response = requests.get(url, headers={'Content-Type': 'application/json'},
+                                    auth=HTTPBasicAuth('apikey', api_key),
+                                    params=params)
+        else:
+            response = requests.get(url, headers={'Content-Type': 'application/json'},
+                                    params=params)
     except: # If any error occurs   
         print("Network exception occurred")
     status_code = response.status_code
@@ -25,7 +71,9 @@ def get_request(url, **kwargs):
         pass # TODO error management
     return json_data        
 
-    
+def post_review_request_to_cf(json_payload_dict):
+    return post_request(url=POST_REVIEW_URL, json_payload_dict=json_payload_dict, api_key=NLU_API_KEY, headers={"accept":"application/json","content-type":"application/json"}) 
+   
 def get_dealers_JSON_parser(json_result):
     ''' parse and convert to model object a GET on dealship database '''
     results = []
@@ -57,6 +105,38 @@ def get_dealers_from_cf(state=None,**kwargs):
         print(GET_ALL_DEALERSHIP_URL)
         return get_all_dealers_from_cf(GET_ALL_DEALERSHIP_URL, **kwargs)   
 
+def analyze_review_sentiments(review, **kwargs): # review as text or object ?
+    params = {}
+    params["text"] = review
+
+    #review #quote_plus(review)
+    params["version"] = NLU_VERSION
+    params["features"] = 'keywords,entities' # IBM endpoint only support comma separated multivalue : force it !
+    params["entities.emotion"] = False
+    params["entities.sentiment"] = True
+    params["keywords.emotion"] = False
+    params["keywords.sentiment"] = True
+    # curl -u "apikey:{apikey}"   "{url}/v1/analyze}?version=2021-03-25&url=www.ibm.com&features=keywords,entities&entities.emotion=true&entities.sentiment=true&keywords.emotion=true&keywords.sentiment=true"
+    response = get_request(url=GET_NLU_URL, api_key=NLU_API_KEY, params=params)
+    print(response)
+    # {'usage': {'text_units': 1, 'text_characters': 38, 'features': 2}, 'language': 'en', 
+        # 'keywords': [{'text': 'dealer', 'sentiment': {'score': 0.977313, 'label': 'positive'}, 'relevance': 0.87516, 'count': 1}, {'text': 'cars', 'sentiment': {'score': 0.956888, 'label': 'positive'}, 'relevance': 0.74128, 'count': 1}], 'entities': []}
+    # TODO : a better algorithm
+    score=0.0
+    iterations=0
+    for list_or_items in ['keywords','entities']:
+        for item in response[list_or_items]:
+            iterations+=1
+            if  item['sentiment']['label'] == 'positive':
+                score+=item['sentiment']['score']
+            else:
+                score-=item['sentiment']['score']
+    if not iterations == 0:
+        score=score/iterations
+    else:
+        score=None
+    return score
+
 def get_reviews_JSON_parser(json_result):
     ''' parse and convert to model object a GET on review database '''
     results = []
@@ -69,14 +149,17 @@ def get_reviews_JSON_parser(json_result):
                                        name=review_dict["name"], id=review_dict["id"], dealership=review_dict["dealership"],
                                        car_year=review_dict["car_year"],
                                        car_model=review_dict["car_model"], car_make=review_dict["car_make"])
+                review_obj.sentiment = analyze_review_sentiments(review_obj.review)
                 results.append(review_obj)
+            print(str(review_obj.sentiment)+'->'+review_obj.name)
     return results     
-    
     
 
 def get_dealer_reviews_from_cf(dealer_id=0,**kwargs):
-    json_result =  get_request(GET_REVIEW_BY_DEALER_URL, dealerId=dealer_id)   
-    return get_reviews_JSON_parser(json_result)
+    json_result =  get_request(GET_REVIEW_BY_DEALER_URL, dealerId=dealer_id) 
+    result =  get_reviews_JSON_parser(json_result)
+    print(result)
+    return result
 
  
 # def get_all_dealers_from_cf(url, **kwargs):
