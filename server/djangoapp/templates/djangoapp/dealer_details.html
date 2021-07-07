@@ -38,8 +38,19 @@
 						<img class="card-img-top img-fluid" src="{{MEDIA_URL}}/emoji/neutral.png" style="display: block; max-width: 3em; height: auto;"></img>
 					{% endif %}
 					<div class="card-body">
-						{% if review.havecar %}
-					    <h5 class="card-title">{{review.car_make}}, {{review.car_model}} ({{review.car_year}})</h5>
+						{% if  review.car_make|length > 0 %}
+							<h5 class="card-title">{{review.car_make}}
+							{% if  review.car_model|length > 0 %}
+								 {{review.car_model}}
+								{% if  review.car_year|length > 0 %}
+					    			 ({{review.car_year}})
+					    		{% endif %}
+					    	{% else %}
+					    		{% if  review.car_year|length > 0 %}
+					    			 ({{review.car_year}})
+					    		{% endif %}
+					    	{% endif %}
+					    	</h5>
 					    {% endif %}
 					    <h6 class="card-subtitle mb-2">{{review.name}}</h6>
 	 					<p class="card-text">{{review.review}}</p>
