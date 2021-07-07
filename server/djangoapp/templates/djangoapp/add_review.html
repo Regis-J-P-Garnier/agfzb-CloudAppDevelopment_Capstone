@@ -19,21 +19,56 @@
 	         format: 'mm/dd/yyyy'
 	       });
 	 </script>
+<style>
+	/* from https://www.w3schools.com/howto/howto_css_custom_checkbox.asp  */
+	* {
+	  box-sizing: border-box;
+	}
+	
+	input[type=text], select, textarea {
+	  width: 100%;
+	  padding: 12px;
+	  border: 1px solid #ccc;
+	  border-radius: 4px;
+	  resize: vertical;
+	}
+	
+	label {
+	  padding: 12px 12px 12px 0;
+	  display: inline-block;
+	}
+	
+	.container-form {
+	  border-radius: 5px;
+	  padding: 20px;
+	}
+
+	</style>
 </head>
 <body>
-	<form action="{% url 'djangoapp:add_review' dealer_id %}" method="post">
-	{% csrf_token %}
-		<textarea class="form-control" id="content" name="content" rows="2"
-			required></textarea>
-		<input class="form-check-input" type="checkbox" name="purchasecheck"
-			id="purchasecheck" value="1">
-		<select name="car" id="car" class="form-select" required>
-			{% for car in cars %}
-				<option selected value={{car.id}}>{{car.name}}-{{car.make.name}}-{{car.year|date:"Y"}}</option> 
-			{% endfor %}
+	<div class="container-form">
+		<form action="{% url 'djangoapp:add_review' dealer_id %}" method="post">
+		{% csrf_token %}
+			<label for="content">your review</label>
+			<textarea class="form-control" id="content" name="content" rows="2"
+				required ></textarea>
+			<label for="car">the car bought/tested</label>
+			<div>
+			<select name="car" id="car" class="form-select" required>
+				{% for car in cars %}
+					<option selected value={{car.id}}>{{car.name}}-{{car.make.name}}-{{car.year|date:"Y"}}</option> 
+				{% endfor %}
 			</select>
-		<input class="date-own form-control" type="text" name="purchasedate" id="purchasedate">
-		<button class="btn btn-primary" type="submit">Submit</button>
-	</form>
+			</div>
+			<div><label for="purchasecheck">bought
+					<input type="checkbox" name="purchasecheck"
+						id="purchasecheck" value="1"></input>
+				
+				</label></div>
+			<label for="b">date of buy/test</label>
+			<input class="date-own form-control" type="text" name="v" id="purchasedate">
+			<button class="btn btn-primary" type="submit">Submit</button>
+		</form>
+	</div>
 </body>
 </html>
