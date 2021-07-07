@@ -38,7 +38,9 @@
 						<img class="card-img-top img-fluid" src="{{MEDIA_URL}}/emoji/neutral.png" style="display: block; max-width: 3em; height: auto;"></img>
 					{% endif %}
 					<div class="card-body">
+						{% if review.havecar %}
 					    <h5 class="card-title">{{review.car_make}}, {{review.car_model}} ({{review.car_year}})</h5>
+					    {% endif %}
 					    <h6 class="card-subtitle mb-2">{{review.name}}</h6>
 	 					<p class="card-text">{{review.review}}</p>
 					</div>
