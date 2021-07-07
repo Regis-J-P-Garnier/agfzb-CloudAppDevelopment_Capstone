@@ -11,12 +11,25 @@
     <link href="https://unpkg.com/bootstrap-table@1.18.2/dist/bootstrap-table.min.css" rel="stylesheet">
     <script src="https://unpkg.com/bootstrap-table@1.18.2/dist/bootstrap-table.min.js"></script>
     <script src="https://unpkg.com/bootstrap-table@1.18.2/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
-
+	<style>  
+		.table-striped > tbody > tr:nth-child(2n+1) > td, .table-striped > tbody > tr:nth-child(2n+1) > th {
+		   background-color: light-grey;
+		}
+	</style>  
+    <style>   
+     body { 
+    	padding-top: 65px;
+    	padding-left:2ex;
+    	padding-right:2ex;
+    	padding-bottom:2ex;
+    	 
+	}
+	</style>
 </head>
 <body>
 	{% include './navbar.html' %}
-	 <table class="table" id="table" data-filter-control="true">
-	        <thead>
+	 <table class="table table-striped" id="table" data-filter-control="true">
+	        <thead style="background-color: #F0F0F0; color: #0f0f0f;">
 	            <tr>
 	                <th data-field="id">ID</th>
 	                <th data-field="Dealer Name">Dealer Name</th>

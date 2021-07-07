@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <style>   
+     body { 
+    	padding-top: 65px;
+    	padding-left:2ex;
+    	padding-right:2ex;
+    	padding-bottom:2ex; 
+	}
+	</style>
     {% load static %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
      <title>
@@ -10,8 +18,15 @@
 </head>
     <body>
     {% include './navbar.html' %}
+    <div class="container-fluid">
+ 	<div class="row">
 	 <h1>
-	Welcome to Best Cars dealership, home to the best cars in North America. We sell domestic and imported cars at reasonable prices.
+	Welcome to Best Cars dealership.
 	</h1>
+	<h6>
+	Home to the best cars in North America. We sell domestic and imported cars at reasonable prices.
+	</h6>
+	</div>
+	</div>
     </body>
 </html>

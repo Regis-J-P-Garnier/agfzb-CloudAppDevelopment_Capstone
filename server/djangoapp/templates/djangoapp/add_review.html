@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<title>Dealership Reviewing</title>
 <meta charset="UTF-8">
 {% load static %}
 <link rel="stylesheet"
@@ -19,6 +20,14 @@
 	         format: 'mm/dd/yyyy'
 	       });
 	 </script>
+<style>   
+	 body { 
+    	padding-top: 65px;
+    	padding-left:2ex;
+    	padding-right:2ex;
+    	padding-bottom:2ex;   
+	}
+	</style>
 <style>
 	/* from https://www.w3schools.com/howto/howto_css_custom_checkbox.asp  */
 	* {
@@ -46,13 +55,19 @@
 	</style>
 </head>
 <body>
+	 {% include './navbar.html' %}
+	<h1>Reviewing {{dealer.full_name}}</h1>
 	<div class="container-form">
 		<form action="{% url 'djangoapp:add_review' dealer_id %}" method="post">
 		{% csrf_token %}
-			<label for="content">your review</label>
+			<label for="content">Enter the review content:</label>
 			<textarea class="form-control" id="content" name="content" rows="2"
 				required ></textarea>
-			<label for="car">the car bought/tested</label>
+			<label for="purchasecheck">
+					<input  type="checkbox" name="purchasecheck" 
+						id="purchasecheck" value="1"></input> Has purchased the car from {{dealer.short_name}} ? <span style="color: #8c8c8c">(select purchased car information below if checked))</span>
+					</label>
+			<label for="car">Select your car (model-make-year):</label>
 			<div>
 			<select name="car" id="car" class="form-select" required>
 				{% for car in cars %}
@@ -60,14 +75,13 @@
 				{% endfor %}
 			</select>
 			</div>
-			<div><label for="purchasecheck">bought
-					<input type="checkbox" name="purchasecheck"
-						id="purchasecheck" value="1"></input>
-				
-				</label></div>
-			<label for="b">date of buy/test</label>
-			<input class="date-own form-control" type="text" name="v" id="purchasedate">
-			<button class="btn btn-primary" type="submit">Submit</button>
+
+			<label for="b">Select your purchase date:</label>
+			<input class="date-own form-control" type="text" name="purchasedate" id="purchasedate"></input>
+			<div style="padding-top:20px;">
+				<button class="btn btn-primary" type="submit">Submit</button>
+			</div>
+			
 		</form>
 	</div>
 </body>

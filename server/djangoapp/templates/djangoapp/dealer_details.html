@@ -2,25 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dealership Review</title>
+    <title>Dealership Reviews</title>
     {% load static %}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+<style>  
+	  body { 
+    	padding-top: 65px;
+    	padding-left:2ex;
+    	padding-right:2ex;
+    	padding-bottom:2ex;  
+	}
+	</style>
 </head>
 
-    <body>
+<body>
     {% include './navbar.html' %}
-    <div style="padding:5ex; padding-top:2ex;">
-    <div style="padding-bottom:5ex;">
-	<h1>Review of {{dealer.name}}</h1>
+	<h1>Reviews of {{dealer.full_name}}</h1>
 	{% if user.is_authenticated %}
-	{{dealership_id}}
-		<a href="{% url 'djangoapp:add_review' dealer_id %}"> add your review </a>
+		<h6><a href="{% url 'djangoapp:add_review' dealer.id %}"> <i class="bi bi-star-fill"></i> Add your review now ! </a> </h6>
+	{% else %}
+		<h6><i class="bi bi-unlock-fill"></i>  Please connect to adding your own review ! </h6>
 	{% endif %}
 	{% if review_list_is_empty %}
-		<a> Not yet reviewed ! Be the First ! </a>
+		<a> <i class="bi bi-star-fill"></i>  Not yet reviewed ! Be the First ! </a>
 	{% else %}
-	</div>
-	<div class="card-deck">
+	<div class="card-deck" style="padding-top:2ex;">
 			{% for review in review_list %}
 				<div class="card mb-4" style="min-width: 10rem; min-width: 20rem;">
 					{% if review.sentiment > 0.3 %}
@@ -39,6 +46,6 @@
 			{% endfor %}
 	</div>
 	{% endif %}
-    </body>
+</body>
 
 </html>

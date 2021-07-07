@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
+from django.template import RequestContext
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import CarDealer, CarModel, CarMake
-from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf, post_review_request_to_cf
+from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf, post_review_request_to_cf, get_dealer_by_id
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -59,6 +60,7 @@ def login_request(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
+            #return render(request, 'djangoapp/dealer_details.html', context)
             return redirect('djangoapp:index')
         else:
             context['message'] = "Invalid username or password."
@@ -91,18 +93,14 @@ def get_dealerships(request, state=None):
         #dealer_names = ' '.join([dealer.short_name for dealer in dealerships]) # Concat all dealer's short name
         #return HttpResponse(dealer_names) # Return a list of dealer short name
     return render(request, 'djangoapp/index.html', context)    
-        
+
 
 def get_reviews(request,dealer_id=0):
     """ retrieve and presents data of reviews """
     context={}    
     if request.method == "GET":
         context["review_list"] = get_dealer_reviews_from_cf(dealer_id)
-        dealership_list= get_dealers_from_cf()
-        for dealer in dealership_list:
-            if dealer.id == dealer_id:
-                context["dealer"]  = dealer
-                context["dealer_id"]  = str(dealer.id)
+        context["dealer"] = get_dealer_by_id(dealer_id)
         if  len(context["review_list"]) == 0:
             context["review_list_is_empty"]=True
         else:
@@ -116,7 +114,9 @@ def add_review(request, dealer_id):
         context={} 
         context["dealer_id"]  = dealer_id  
         if request.method == "GET":
+            context["dealer"] = get_dealer_by_id(dealer_id)
             context["cars"] = CarModel.objects.filter(dealerId=dealer_id) # REFACTOR : name of delear ID somewhere
+            
             return render(request, 'djangoapp/add_review.html', context) 
         if request.method == "POST":
             user = request.user
@@ -143,11 +143,9 @@ def add_review(request, dealer_id):
                 review["another"]=None
                 # not persistant
                 review["time"] = datetime.utcnow().isoformat()
-                print(review)
                 response = post_review_request_to_cf(review)
-                print(response)
-                review_done=response
-        return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
+                #TODO error analysis
+        return redirect("djangoapp:dealer_details", dealer_id)
             
 # Create a `get_dealer_details` view to render the reviews of a dealer
 # def get_dealer_details(request, dealer_id):
