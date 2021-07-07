@@ -101,7 +101,8 @@ def get_reviews(request,dealer_id=0):
         dealership_list= get_dealers_from_cf()
         for dealer in dealership_list:
             if dealer.id == dealer_id:
-                context["dealership_name"] = dealer.full_name
+                context["dealer"]  = dealer
+                context["dealer_id"]  = str(dealer.id)
         if  len(context["review_list"]) == 0:
             context["review_list_is_empty"]=True
         else:
@@ -111,29 +112,42 @@ def get_reviews(request,dealer_id=0):
         #return HttpResponse(reviewers_names) # Return a list of reviewers short name
     return render(request, 'djangoapp/dealer_details.html', context)   
 
-
-
 def add_review(request, dealer_id):
-        review_done=""
-        user = request.user
-        if user.is_authenticated:
-            json_payload_dict={}
-            review ={}
-            review["time"] = datetime.utcnow().isoformat()
-            review["name"] = "BETA TESTER"
-            review["dealership"] = 19
-            review["purchase"]=True
-            review["another"]=""
-            review["purchase_date"]="2021-07-08"
-            review["car_make"]="Ligier"
-            review["car_model"]=""
-            review["car_year"]="2021-01-01"
-            review["review"]="revue du 2021-01-01"
-            print(review)
-            response = post_review_request_to_cf(review)
-            print(response)
-            review_done=response
-        return HttpResponse(review_done)
+        context={} 
+        context["dealer_id"]  = dealer_id  
+        if request.method == "GET":
+            context["cars"] = CarModel.objects.filter(dealerId=dealer_id) # REFACTOR : name of delear ID somewhere
+            return render(request, 'djangoapp/add_review.html', context) 
+        if request.method == "POST":
+            user = request.user
+            if user.is_authenticated:
+                json_payload_dict={}
+                review={}
+                #required fields
+                review["name"] = user.username
+                review["dealership"] = dealer_id
+                #review["purchase"]=request.POST["purchasecheck"]
+                checked_values = request.POST.getlist("purchasecheck")
+                if len(checked_values)==1:
+                    review["purchase"]= True
+                else:
+                    review["purchase"]= False
+                review["review"]=request.POST["content"]# REFACTOR : rename in HTML form
+                #optionals
+                car_object=CarModel.objects.filter(id=request.POST["car"])
+                review["car_make"]=car_object[0].name
+                review["car_model"]=car_object[0].type # REFACTOR : mode of type
+                review["car_year"]=car_object[0].year.strftime("%Y")
+                review["purchase_date"]=request.POST["purchasedate"]
+                # out of form
+                review["another"]=None
+                # not persistant
+                review["time"] = datetime.utcnow().isoformat()
+                print(review)
+                response = post_review_request_to_cf(review)
+                print(response)
+                review_done=response
+        return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
             
 # Create a `get_dealer_details` view to render the reviews of a dealer
 # def get_dealer_details(request, dealer_id):

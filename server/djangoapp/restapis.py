@@ -102,6 +102,7 @@ def get_dealers_from_cf(state=None,**kwargs):
         return get_all_dealers_from_cf(GET_ALL_DEALERSHIP_URL, **kwargs)   
 
 def analyze_review_sentiments(review, **kwargs): # review as text or object ?
+    """ retireve sentiments on differents items in review and """
     params = {}
     params["text"] = review
     #review #quote_plus(review)
@@ -123,6 +124,7 @@ def analyze_review_sentiments(review, **kwargs): # review as text or object ?
         features.append('keywords')
     if 'entities' in response.keys():
         features.append('entities')    
+    print(features)
     for list_or_items in features:
         for item in response[list_or_items]:
             try:    
@@ -132,6 +134,7 @@ def analyze_review_sentiments(review, **kwargs): # review as text or object ?
                     score-=item['sentiment']['score']
                 iterations+=1
             except KeyError:
+                print("ERROR when retrieving sentiment score from WATSON's response")
                 break
     if not iterations == 0:
         score=score/iterations
@@ -150,7 +153,6 @@ def get_reviews_JSON_parser(json_result):
                 else:
                     pass # TODO :error return
         else:
-            print(json_result)
             reviews = json_result["data"] # Get the row list in JSON as dealers
             for review_dict in reviews: # For each dealer object
                 if (review_dict != {}): # DEBUG : why ???
