@@ -138,10 +138,6 @@ def add_review(request, dealer_id):
                 review["car_make"]=car_object[0].name
                 review["car_model"]=car_object[0].type # REFACTOR : mode of type
                 review["car_year"]=car_object[0].year.strftime("%Y")
-                if len(review["car_make"]) >0 and len(review["car_model"]) >0 and len(review["car_year"]) >0:
-                    review["havecar"]=True
-                else:
-                    review["havecar"]=False
                 review["purchase_date"]=request.POST["purchasedate"]
                 # out of form
                 review["another"]=None
