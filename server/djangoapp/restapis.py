@@ -4,8 +4,6 @@ from .models import CarDealer, DealerReview
 from requests.auth import HTTPBasicAuth
 from urllib.parse import urlencode, quote_plus, quote
 
-
-
 GET_DEALERSHIP_BY_STATE_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/dealership"
 GET_ALL_DEALERSHIP_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/alldealership"
 GET_REVIEW_BY_DEALER_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/review"
