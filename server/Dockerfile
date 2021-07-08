@@ -19,7 +19,6 @@ RUN pip install -r requirements.txt
 
 # Copy the rest of the files
 COPY . $APP
-COPY .env /.env # EXPLICIT DJANGO ENV & SECRET KEYS
 
 EXPOSE 8000
 
