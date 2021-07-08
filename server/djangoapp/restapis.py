@@ -3,14 +3,31 @@ import json
 from .models import CarDealer, DealerReview
 from requests.auth import HTTPBasicAuth
 from urllib.parse import urlencode, quote_plus, quote
+import os
+from dotenv import load_dotenv
 
-GET_DEALERSHIP_BY_STATE_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/dealership"
-GET_ALL_DEALERSHIP_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/alldealership"
-GET_REVIEW_BY_DEALER_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/review"
-POST_REVIEW_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/review"
-NLU_API_KEY="3JRYQBDauu2GkgWjkoffZH7IksttkjR20diV_c9KBMRK"
-GET_NLU_URL="https://api.eu-gb.natural-language-understanding.watson.cloud.ibm.com/instances/2c07214f-0d62-4c52-9bff-6bef76b858dc/v1/analyze"
-NLU_VERSION ='2021-03-25'
+project_folder = os.path.expanduser(os.path.dirname(os.path.realpath(__file__)))  # adjust as appropriate
+load_dotenv(os.path.join(project_folder, '../djangobackend/.env'))
+
+assert(os.getenv("DEBUG")=="True")
+GET_DEALERSHIP_BY_STATE_URL=os.getenv('GET_DEALERSHIP_BY_STATE_URL')
+GET_ALL_DEALERSHIP_URL=os.getenv('GET_ALL_DEALERSHIP_URL')
+GET_REVIEW_BY_DEALER_URL=os.getenv('GET_REVIEW_BY_DEALER_URL')
+POST_REVIEW_URL=os.getenv('POST_REVIEW_URL')
+NLU_API_KEY=os.getenv('NLU_API_KEY')
+GET_NLU_URL=os.getenv('GET_NLU_URL')
+NLU_VERSION =os.getenv('NLU_VERSION')
+
+# for debugging only instead og .ENV
+# NON PRESENT EVEN AS COMMENT IN PRODUCTION
+
+# GET_DEALERSHIP_BY_STATE_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/dealership"
+# GET_ALL_DEALERSHIP_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/alldealership"
+# GET_REVIEW_BY_DEALER_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/review"
+# POST_REVIEW_URL="https://b09a1fd3.eu-gb.apigw.appdomain.cloud/api/review"
+# NLU_API_KEY="3JRYQBDauu2GkgWjkoffZH7IksttkjR20diV_c9KBMRK"
+# GET_NLU_URL="https://api.eu-gb.natural-language-understanding.watson.cloud.ibm.com/instances/2c07214f-0d62-4c52-9bff-6bef76b858dc/v1/analyze"
+# NLU_VERSION ='2021-03-25'
 
 def post_request(url, json_payload_dict, api_key=None, headers=None, **kwargs):
     ''' do a POST request '''
@@ -48,7 +65,6 @@ def get_request(url, api_key=None, params=None, **kwargs):
             params=kwargs
     
     print("GET from {} ".format(url))
-    print(params)
     try: # Call get method of requests library with URL and parameters
         if NLU_API_KEY:
             response = requests.get(url, headers={'Content-Type': 'application/json'},
